@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Partidos de Fútbol</title>
+</head>
+<body>
+    <h1>Partidos de Fútbol</h1>
+    <ul>
+        {% for match in matches %}
+        <li>{{ match.title }} - {{ match.date }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

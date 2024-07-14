@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva de Canchas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            width: 14.28%;
+            max-width: 14.28%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .btn {
+            text-decoration: none;
+            padding: 5px 10px;
+            color: white;
+            background-color: blue;
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: blue;
+        }
+        .btn-danger {
+            background-color: red;
+        }
+        .btn-danger:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reserva de Canchas</h1>
+
+    <form method="get" action="{{ url_for('index') }}">
+        <label for="selected_date">Seleccionar Fecha:</label>
+        <input type="date" id="selected_date" name="selected_date" value="{{ selected_date }}">
+        <button type="submit" name="view_type" value="day">Día</button>
+        <button type="submit" name="view_type" value="week">Semana</button>
+        <button type="submit" name="view_type" value="month">Mes</button>
+    </form>
+
+    {% for cancha in canchas %}
+        <h2>{{ cancha.name }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    {% for date in dates %}
+                        <th>{{ date.strftime('%A %d') }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for hour in range(8, 23) %}
+                    <tr>
+                        <td>{{ '%02d:00' % hour }}</td>
+                        {% for date in dates %}
+                            {% set reservation = reservations_by_date.get(date, {}).get(cancha.id, {}).get(time(hour, 0), None) %}
+                            {% if reservation %}
+                                <td>
+                                    Reservado por {{ reservation.user_name }}
+                                    <form action="{{ url_for('delete_reservation', reservation_id=reservation.id) }}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    </form>
+                                </td>
+                            {% else %}
+                                <td><a href="{{ url_for('reserve', cancha_id=cancha.id, date=date.strftime('%Y-%m-%d'), time='%02d:00' % hour) }}" class="btn btn-primary">Reservar</a></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+</body>
+</html>
