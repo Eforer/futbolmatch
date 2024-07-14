@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Agregar Jugadores{% endblock %}
+{% block content %}
+    <h2>Agregar Jugadores al Partido</h2>
+    <form method="POST" action="{{ url_for('add_players') }}">
+        {{ form.hidden_tag() }}
+        <div class="container">
+            <div class="card shadow">
+                <div class="card-body">
+                    <!-- Tabla -->
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Nombre</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_id, username in form.players.choices %}
+                            <tr>
+                                <td>{{ user_id }}</td>
+                                <td>{{ username }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('add_players') }}">
+                                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                                    </form>
+                                </td>   
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+    <h2>Jugadores del Partido</h2>
+    <ul id="match-players-list">
+        {% for player in match.players %}
+            <li>{{ player.username }}</li>
+        {% endfor %}
+    </ul>
+    <form method="POST" action="{{ url_for('finish_creation') }}">
+        <button type="submit" class="btn btn-success">Finish Creation</button>
+    </form>
+{% endblock %}
