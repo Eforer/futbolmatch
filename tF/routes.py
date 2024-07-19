@@ -4,18 +4,13 @@ from app import app, db, bcrypt
 from forms import RegistrationForm, LoginForm, MatchForm, EditMatchForm
 from models import User, Match, user_match
 from flask_login import login_user, current_user, logout_user, login_required
+from flask import jsonify
 
 @app.route("/")
 @app.route("/home")
 def home():
-    try:
-        matches = Match.query.all()
-        if not matches:
-            flash('No matches found.', 'warning')
-        return render_template('match_list.html', matches=matches)
-    except Exception as e:
-        flash(f'An error occurred: {str(e)}', 'danger')
-        return render_template('match_list.html', matches=[])
+    matches = Match.query.all()
+    return render_template('match_list.html', matches=matches)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -54,7 +49,7 @@ def logout():
 @login_required
 def join_match(match_id):
     match = Match.query.get_or_404(match_id)
-    if match.players.count() < 10:
+    if len(match.players) < 10:
         match.players.append(current_user)
         db.session.commit()
         flash('You have joined the match!', 'success')
@@ -116,6 +111,7 @@ def edit_match(match_id):
         match.date = form.date.data
         match.location = form.location.data
         
+        # Actualizar jugadores
         selected_players = form.players.data
         match.players = [User.query.get(player_id) for player_id in selected_players if User.query.get(player_id)]
         
@@ -146,6 +142,7 @@ def new_match():
         db.session.add(match)
         db.session.commit()
         
+        # Guardar el id del partido en la sesión
         session['match_id'] = match.id
         flash('Match created. Now add players to the match.', 'success')
         return redirect(url_for('add_players'))
@@ -162,6 +159,7 @@ def add_players():
     
     match = Match.query.get(match_id)
     form = MatchForm()
+    # Filtrar jugadores que no están ya en el partido
     form.players.choices = [(user.id, user.username) for user in User.query.all() if user not in match.players]
     
     if request.method == 'POST':
