@@ -62,28 +62,62 @@ def delete_reservation(reservation_id):
         flash('Reserva no encontrada', 'danger')
     return redirect(url_for('index'))
 
-import logging
+@app.route('/api/reservations', methods=['POST'])
+def create_reservation():
+    data = request.json
+    if not data:
+        return jsonify({"error": "No input data provided"}), 400
+    
+    required_fields = ['cancha_id', 'date', 'start_time', 'end_time', 'user_name']
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
 
-logging.basicConfig(level=logging.DEBUG)
+    try:
+        date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+        start_time = datetime.strptime(data['start_time'], '%H:%M').time()
+        end_time = datetime.strptime(data['end_time'], '%H:%M').time()
+
+        new_reservation = Reservation(
+            date=date,
+            start_time=start_time,
+            end_time=end_time,
+            user_name=data['user_name'],
+            cancha_id=data['cancha_id']
+        )
+        
+        db.session.add(new_reservation)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Reservation created successfully",
+            "reservation_id": new_reservation.id
+        }), 201
+
+    except ValueError:
+        return jsonify({"error": "Invalid date or time format"}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/availability', methods=['GET'])
-def get_availability():
+def check_availability():
     cancha_id = request.args.get('cancha_id')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    app.logger.debug(f'Received request with cancha_id={cancha_id}, start_date={start_date}, end_date={end_date}')
-
-    if not cancha_id or not start_date or not end_date:
-        app.logger.error('Missing required parameters')
-        return jsonify({"error": "Missing required parameters"}), 400
+    if not all([cancha_id, start_date, end_date]):
+        return jsonify({"error": "Faltan parámetros requeridos"}), 400
 
     try:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        cancha_id = int(cancha_id)
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
     except ValueError:
-        app.logger.error('Invalid date format')
-        return jsonify({"error": "Invalid date format"}), 400
+        return jsonify({"error": "Formato de fecha inválido o ID de cancha no numérico"}), 400
+
+    cancha = Cancha.query.get(cancha_id)
+    if not cancha:
+        return jsonify({"error": "Cancha no encontrada"}), 404
 
     reservations = Reservation.query.filter(
         Reservation.cancha_id == cancha_id,
@@ -94,11 +128,19 @@ def get_availability():
     availability = []
     for reservation in reservations:
         availability.append({
-            'date': reservation.date.strftime('%Y-%m-%d'),
-            'start_time': reservation.start_time.strftime('%H:%M'),
-            'end_time': reservation.end_time.strftime('%H:%M'),
-            'user_name': reservation.user_name
+            "date": reservation.date.strftime('%Y-%m-%d'),
+            "start_time": reservation.start_time.strftime('%H:%M'),
+            "end_time": reservation.end_time.strftime('%H:%M'),
+            "user_name": reservation.user_name
         })
-
-    app.logger.debug(f'Returning availability: {availability}')
     return jsonify(availability)
+
+@app.route('/api/reservations/<int:reservation_id>', methods=['DELETE'])
+def delete_reservation_api(reservation_id):
+    reservation = Reservation.query.get(reservation_id)
+    if reservation:
+        db.session.delete(reservation)
+        db.session.commit()
+        return jsonify({"message": "Reservation deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Reservation not found"}), 404
