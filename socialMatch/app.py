@@ -2,10 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import os
 from datetime import datetime, timedelta
 from models import db, Users, Friendships
+from flask import jsonify
+from flask_cors import CORS
 
 template_dir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 template_dir = os.path.join(template_dir, 'src', 'templates')
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = 'tu_clave_secreta'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@localhost/socialmatch'
@@ -139,7 +142,47 @@ def delete_friend(friend_id):
         db.session.commit()
 
     return redirect(url_for('home'))
+# APIS
+# API route to get all users
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    users = Users.query.all()
+    return jsonify([{
+        'id': user.id,
+        'nombre': user.nombre,
+        'apellido': user.apellido,
+        'email': user.email,
+        'fecha_nacimiento': user.fecha_nacimiento.isoformat() if user.fecha_nacimiento else None
+    } for user in users])
 
+# API route to get a specific user
+@app.route('/api/users/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    user = Users.query.get_or_404(user_id)
+    return jsonify({
+        'id': user.id,
+        'nombre': user.nombre,
+        'apellido': user.apellido,
+        'email': user.email,
+        'fecha_nacimiento': user.fecha_nacimiento.isoformat() if user.fecha_nacimiento else None
+    })
+
+# API route to search users
+@app.route('/api/users/search', methods=['GET'])
+def search_users():
+    query = request.args.get('q', '')
+    users = Users.query.filter(
+        (Users.nombre.like(f'%{query}%')) |
+        (Users.apellido.like(f'%{query}%')) |
+        (Users.email.like(f'%{query}%'))
+    ).all()
+    return jsonify([{
+        'id': user.id,
+        'nombre': user.nombre,
+        'apellido': user.apellido,
+        'email': user.email,
+        'fecha_nacimiento': user.fecha_nacimiento.isoformat() if user.fecha_nacimiento else None
+    } for user in users])
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
