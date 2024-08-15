@@ -1,42 +1,75 @@
+:root {
+    --primary-color: #343a40;
+    --secondary-color: #007bff;
+    --text-color: #333;
+    --background-color: #f4f4f9;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f4f9;
+    background-color: var(--background-color);
     margin: 0;
     padding: 0;
     background-image: url('./../img/friend-futbol.webp');
-    background-size: cover; /* Ajusta el tamaño de la imagen para cubrir todo el fondo */
-    background-position: center; /* Centra la imagen en el fondo */
+    background-size: cover;
+    background-position: center;
     background-repeat: no-repeat;
+    color: var(--text-color);
 }
 
-nav {
-    background-color: #343a40;
-    color: #000000;
-    opacity: 90%;
-    padding: 10px;
+.header {
+    background-color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-nav ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+.navbar {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    opacity: 0.9;
 }
 
-nav ul li {
-    display: inline;
-}
-
-nav ul li a {
-    color: #444343;
+.navbar-logo a {
+    color: white;
+    font-size: 1.5rem;
     text-decoration: none;
-    padding: 10px 20px;
-    display: inline-block;
+    font-weight: bold;
 }
 
-nav ul li a:hover {
-    color: #007bff;
+.navbar-menu {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-menu li {
+    margin-left: 1rem;
+}
+
+.navbar-menu a {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar-menu a:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: var(--secondary-color);
+}
+
+.navbar-toggle {
+    display: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
 }
 
 .container {
@@ -49,7 +82,7 @@ nav ul li a:hover {
 }
 
 h2 {
-    color: #343a40;
+    color: var(--primary-color);
 }
 
 form {
@@ -63,7 +96,7 @@ form div {
 
 form label {
     margin-bottom: 5px;
-    color: #343a40;
+    color: var(--primary-color);
 }
 
 form input[type="text"],
@@ -80,7 +113,7 @@ form select {
 }
 
 form input[type="submit"] {
-    background-color: #28a745;
+    background-color: var(--success-color);
     color: #ffffff;
     padding: 10px;
     font-size: 16px;
@@ -126,7 +159,7 @@ ul li {
 }
 
 ul li ul {
-    background-color: #f4f4f9;
+    background-color: var(--background-color);
     padding: 10px;
     border-radius: 4px;
 }
@@ -135,99 +168,53 @@ ul li ul li {
     margin-bottom: 5px;
 }
 
-a.button {
-    display: inline-block;
-    padding: 10px 20px;
-    margin-top: 10px;
-    background-color: #007bff;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 4px;
-}
-
-a.button:hover {
-    background-color: #29b1ff;
-}
 a.button, button.button {
     display: inline-block;
     padding: 10px 20px;
     margin-top: 10px;
-    background-color: #007bff;  /* Azul */
+    background-color: var(--secondary-color);
     color: #ffffff;
     text-decoration: none;
     border-radius: 4px;
     border: none;
     cursor: pointer;
     font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 a.button:hover, button.button:hover {
-    background-color: #0056b3;  /* Azul oscuro */
-}
-
-a.button, button.button {
-    display: inline-block;
-    padding: 10px 20px;
-    margin-top: 10px;
-    background-color: #007bff;  /* Azul */
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-a.button:hover, button.button:hover {
-    background-color: #0056b3;  /* Azul oscuro */
+    background-color: #0056b3;
 }
 
 button.button.red {
-    background-color: #dc3545;  /* Rojo */
+    background-color: var(--danger-color);
 }
 
 button.button.red:hover {
-    background-color: #c82333;  /* Rojo oscuro */
+    background-color: #c82333;
 }
 
-form input[type="submit"] {
-    background-color: #28a745;  /* Verde */
-    color: #ffffff;
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
+@media (max-width: 768px) {
+    .navbar-menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background-color: var(--primary-color);
+        padding: 1rem;
+    }
 
-form input[type="submit"]:hover {
-    background-color: #218838;
-}
+    .navbar-menu.active {
+        display: flex;
+    }
 
+    .navbar-menu li {
+        margin: 0.5rem 0;
+    }
 
-
-
-a.button, button.button {
-    display: inline-block;
-    padding: 10px 20px;
-    margin-top: 10px;
-    background-color: #007bff;  /* Azul */
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-a.button:hover, button.button:hover {
-    background-color: #0056b3;  /* Azul oscuro */
-}
-
-button.button.red {
-    background-color: #dc3545;  /* Rojo */
-}
-
-button.button.red:hover {
-    background-color: #c82333;  /* Rojo oscuro */
+    .navbar-toggle {
+        display: block;
+    }
 }
